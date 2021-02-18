@@ -1,2 +1,3 @@
 # TA1-17
-Tugas Akhir
+
+Sistem Informasi Institut Teknologi Del
