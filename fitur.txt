@@ -1,0 +1,13 @@
+	-- Feature Code Done --
+URL Length				v
+Server Form Handler (<a href)			? (sosmed ikut?)
+Abnormal URL (whois)			v
+Obfuscated Code
+Number of Third Party Domain
+Request for Cookie			v
+Google index (linkody)
+HTML tags				v
+HTML properties				v
+EventHandler				v
+DOM Object				v
+JavaScript method			v
