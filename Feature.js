@@ -7,11 +7,11 @@ function isValidURL(string) {
     return (res !== null);
 };
 
-function URLLength(url){
+function URLLength(url) {
     var longCharacters = url.length;
-    if (longCharacters > 75){
+    if (longCharacters > 75) {
         longurl = "Lebih dari 75";
-    } else if (longCharacters <= 75 && longCharacters >= 54){
+    } else if (longCharacters <= 75 && longCharacters >= 54) {
         longurl = "Antara 54 dan 75";
     } else {
         longurl = "Kurang dari 54";
@@ -19,29 +19,29 @@ function URLLength(url){
     return longurl;
 }
 
-function ServerFormHandler(parser, domainURL){
+function ServerFormHandler(parser, domainURL) {
     const anchors = parser.getElementsByTagName('a');
     for (let anchor of anchors) {
         let href = anchor.attributes.href;
-        if (href){
+        if (href) {
             getDomainFromAnchor = isValidURL(href.value);
-            if (getDomainFromAnchor == true){
+            if (getDomainFromAnchor == true) {
                 var getDomainFromAnchor = urlParser.domainURL(href.value);
-                if (getDomainFromAnchor != domainURL){
+                if (getDomainFromAnchor != domainURL) {
                     urlOfServerFormHandler = 'Mengarah ke domain berbeda';
                     break;
                 } else {
                     urlOfServerFormHandler = 'Mengarah ke domain sendiri'
                 }
-            }             
+            }
         }
     }
     return (urlOfServerFormHandler);
 }
 
-async function AbnormalURL(urlInWHOISInfo){
-    if (urlInWHOISInfo){
-        if (urlInWHOISInfo.WhoisRecord.dataError == "IN_COMPLETE_DATA" || urlInWHOISInfo.WhoisRecord.dataError == "MISSING_WHOIS_DATA"|| urlInWHOISInfo.WhoisRecord.parseCode == 0) {
+async function AbnormalURL(urlInWHOISInfo) {
+    if (urlInWHOISInfo) {
+        if (urlInWHOISInfo.WhoisRecord.dataError == "IN_COMPLETE_DATA" || urlInWHOISInfo.WhoisRecord.dataError == "MISSING_WHOIS_DATA" || urlInWHOISInfo.WhoisRecord.parseCode == 0) {
             urlInWHOIS = "Tidak tersimpan di database whois";
         } else {
             urlInWHOIS = "Tersimpan di database whois";
@@ -49,39 +49,39 @@ async function AbnormalURL(urlInWHOISInfo){
     } else {
         urlInWHOIS = "Tidak tersimpan di database whois";
     }
-    
+
     return urlInWHOIS;
 }
 
-function obfuscatedCode(url){
+function obfuscatedCode(url) {
 
 }
 
-function numberOfThirdsPartyDomain(url){
+function numberOfThirdsPartyDomain(url) {
     var count_subdomain = 0;
     var subDomainLenght = 0;
 
     var linkSplit = url.split("?");
     var linkSplitSubdomain = linkSplit[1].split(".").reverse();
 
-    if (linkSplitSubdomain[linkSplitSubdomain.length-1] == 'www') {
-        subDomainLenght = linkSplitSubdomain.length-1;
+    if (linkSplitSubdomain[linkSplitSubdomain.length - 1] == 'www') {
+        subDomainLenght = linkSplitSubdomain.length - 1;
     } else {
         subDomainLenght = linkSplitSubdomain.length;
     }
 
     if (linkSplitSubdomain[1] == 'co') {
         for (i = 3; i < subDomainLenght; i++) {
-            count_subdomain=count_subdomain+1;
-          }
+            count_subdomain = count_subdomain + 1;
+        }
     } else {
         for (i = 2; i < subDomainLenght.length; i++) {
-            count_subdomain=count_subdomain+1;
-          }
+            count_subdomain = count_subdomain + 1;
+        }
     }
-    if (count_subdomain > 2){
+    if (count_subdomain > 2) {
         numberOf_subdomain = '>2';
-    } else if (count_subdomain == 2){
+    } else if (count_subdomain == 2) {
         numberOf_subdomain = '2';
     } else {
         numberOf_subdomain = '>= 0 dan < 2';
@@ -89,25 +89,25 @@ function numberOfThirdsPartyDomain(url){
     return (numberOf_subdomain);
 }
 
-function requestForCookie(url){
+function requestForCookie(url) {
     var cookie = url.include("cookie");
-    if(cookie == true){
+    if (cookie == true) {
         url_cookie = 'Ada request cookie';
     } else {
         url_cookie = 'Tidak ada request cookie';
     }
 }
 
-function htmlTags(url){
-    var tags = new Array ("<script>","<iframe>", "<meta>", "<form>", "<img>", "<textarea>", "<div>");
+function htmlTags(url) {
+    var tags = new Array("<script>", "<iframe>", "<meta>", "<form>", "<img>", "<textarea>", "<div>");
     var index, check = 0;
-    for(index = 0; index < tags.length; index++){
-        if(url.include(tags[index])){
+    for (index = 0; index < tags.length; index++) {
+        if (url.include(tags[index])) {
             check = 1;
             break;
         }
     }
-    if(check == 1){
+    if (check == 1) {
         tag_html = 'Terdapat HTML tags';
     } else {
         tag_html = 'Tidak ada HTML tags';
@@ -115,16 +115,16 @@ function htmlTags(url){
     return tag_html;
 }
 
-function htmlProperties(url){
-    var properties = new Array ('href', 'http-equiv', 'action', 'src', 'lowsrc');
+function htmlProperties(url) {
+    var properties = new Array('href', 'http-equiv', 'action', 'src', 'lowsrc');
     var index, check = 0;
-    for(index = 0; index < properties.length; index++){
-        if(url.include(properties[index])){
+    for (index = 0; index < properties.length; index++) {
+        if (url.include(properties[index])) {
             check = 1;
             break;
         }
     }
-    if(check == 1){
+    if (check == 1) {
         properties_html = 'Terdapat HTML properties';
     } else {
         properties_html = 'Tidak ada HTML properties';
@@ -132,16 +132,16 @@ function htmlProperties(url){
     return properties_html;
 }
 
-function eventHandler(url){
-    var event = new Array ('onclick', 'onmouseover', 'onerror', 'onload', 'onfocus');
+function eventHandler(url) {
+    var event = new Array('onclick', 'onmouseover', 'onerror', 'onload', 'onfocus');
     var index, check = 0;
-    for(index = 0; index < event.length; index++){
-        if(url.include(event[index])){
+    for (index = 0; index < event.length; index++) {
+        if (url.include(event[index])) {
             check = 1;
             break;
         }
     }
-    if(check == 1){
+    if (check == 1) {
         handler = 'Terdapat EventHandler';
     } else {
         handler = 'Tidak ada EventHandler';
@@ -149,16 +149,16 @@ function eventHandler(url){
     return handler;
 }
 
-function domObjects(url){
-    var objects = new Array ('windows', 'location', 'document');
+function domObjects(url) {
+    var objects = new Array('windows', 'location', 'document');
     var index, check = 0;
-    for(index = 0; index < objects.length; index++){
-        if(url.include(objects[index])){
+    for (index = 0; index < objects.length; index++) {
+        if (url.include(objects[index])) {
             check = 1;
             break;
         }
     }
-    if(check == 1){
+    if (check == 1) {
         objects_dom = 'Terdapat DOM objects';
     } else {
         objects_dom = 'Tidak ada DOM objects';
@@ -166,16 +166,16 @@ function domObjects(url){
     return objects_dom;
 }
 
-function javascriptMethod(url){
-    var method = new Array ('write', 'getElementsByTagName', 'alert', 'eval', 'fromCharCode');
+function javascriptMethod(url) {
+    var method = new Array('write', 'getElementsByTagName', 'alert', 'eval', 'fromCharCode');
     var index, check = 0;
-    for(index = 0; index < method.length; index++){
-        if(url.include(method[index])){
+    for (index = 0; index < method.length; index++) {
+        if (url.include(method[index])) {
             check = 1;
             break;
         }
     }
-    if(check == 1){
+    if (check == 1) {
         js_method = 'Terdapat javascript method';
     } else {
         js_method = 'Tidak ada javascript method';
@@ -183,7 +183,7 @@ function javascriptMethod(url){
     return js_method;
 }
 
-async function features(url){
+async function features(url) {
     var dom = await htmlParser.DOM_parser(url);
     var parser = urlParser.convertToURL(url);
     var domain = urlParser.domainURL(url);
@@ -207,16 +207,16 @@ async function features(url){
 
     var all_features = [];
     await all_features.push(request_URL,
-                            length_URL,
-                            URL_of_SFH,
-                            number_of_subdomain,
-                            abnormal_URL,
-                            request_cookie,
-                            html_tags,
-                            html_properties,
-                            event_handler,
-                            dom_objects,
-                            javascript_method);
+        length_URL,
+        URL_of_SFH,
+        number_of_subdomain,
+        abnormal_URL,
+        request_cookie,
+        html_tags,
+        html_properties,
+        event_handler,
+        dom_objects,
+        javascript_method);
 
     return all_features;
 }
