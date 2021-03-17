@@ -61,7 +61,7 @@ function numberOfThirdsPartyDomain(url) {
     var count_subdomain = 0;
     var subDomainLenght = 0;
 
-    var linkSplit = url.split("?");
+    var linkSplit = url.split("//");
     var linkSplitSubdomain = linkSplit[1].split(".").reverse();
 
     if (linkSplitSubdomain[linkSplitSubdomain.length - 1] == 'www') {
@@ -79,12 +79,11 @@ function numberOfThirdsPartyDomain(url) {
             count_subdomain = count_subdomain + 1;
         }
     }
-    if (count_subdomain > 2) {
-        numberOf_subdomain = '>2';
-    } else if (count_subdomain == 2) {
-        numberOf_subdomain = '2';
+
+    if (count_subdomain == 1) {
+        numberOf_subdomain = 'Tidak ada third-party domain';
     } else {
-        numberOf_subdomain = '>= 0 dan < 2';
+        numberOf_subdomain = 'Ada third-party domain';
     }
     return (numberOf_subdomain);
 }
