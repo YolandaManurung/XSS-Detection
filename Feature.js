@@ -57,35 +57,58 @@ function obfuscatedCode(url) {
 
 }
 
-function numberOfThirdsPartyDomain(url) {
-    var count_subdomain = 0;
-    var subDomainLenght = 0;
+function numberForDomain(url){
+    var count_domain = 0;
+    var domainLenght = 0;
 
     var linkSplit = url.split("//");
-    var linkSplitSubdomain = linkSplit[1].split(".").reverse();
+    // console.log(linkSplit);
+    var linkSplitStr = linkSplit[1].split("/");
+    // console.log("SplitStr: "+ linkSplitStr);
+    var linkSplitDomain = linkSplitStr[0].split(".").reverse();
+    // console.log(linkSplitDomain);
 
-    if (linkSplitSubdomain[linkSplitSubdomain.length - 1] == 'www') {
-        subDomainLenght = linkSplitSubdomain.length - 1;
-    } else {
-        subDomainLenght = linkSplitSubdomain.length;
+    domainLenght = linkSplitDomain.length;
+
+    if (linkSplitDomain[1] == 'co') {
+        domainLenght--;
     }
 
-    if (linkSplitSubdomain[1] == 'co') {
-        for (i = 3; i < subDomainLenght; i++) {
-            count_subdomain = count_subdomain + 1;
+    for (i = 1; i < domainLenght; i++) {
+        count_domain++;
+    }
+
+    // console.log(linkSplitDomain.length);
+    // console.log(domainLenght);
+    // console.log(count_domain);
+    if (count_domain == 1){
+        number_of_domain = 'Satu domain';
+    } else if (count_domain == 2){
+        number_of_domain = 'Dua domain';
+    } else {
+        number_of_domain = 'Lebih dari dua domain';
+    }
+    return (number_of_domain);
+}
+
+function numberOfThirdPartyDomain(url){
+    var linkSplit = url.split("//");
+    // console.log(linkSplit);
+
+    var check = 0;
+    for (i = 1; i < linkSplit.length; i++){
+        if (linkSplit[i].includes("http") || linkSplit[i].includes("https")){
+            check = 1;
+            break;
         }
-    } else {
-        for (i = 2; i < subDomainLenght.length; i++) {
-            count_subdomain = count_subdomain + 1;
-        }
     }
 
-    if (count_subdomain == 1) {
-        numberOf_subdomain = 'Tidak ada third-party domain';
+    if (check == 1){
+        thirdPartyDomain = "Ada third-party domain";
     } else {
-        numberOf_subdomain = 'Ada third-party domain';
+        thirdPartyDomain = "Tidak ada third-party domain";
     }
-    return (numberOf_subdomain);
+    return thirdPartyDomain;
 }
 
 function requestForCookie(url) {
