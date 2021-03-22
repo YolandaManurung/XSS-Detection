@@ -57,53 +57,19 @@ function obfuscatedCode(url) {
 
 }
 
-function numberForDomain(url){
-    var count_domain = 0;
-    var domainLenght = 0;
-
-    var linkSplit = url.split("//");
-    // console.log(linkSplit);
-    var linkSplitStr = linkSplit[1].split("/");
-    // console.log("SplitStr: "+ linkSplitStr);
-    var linkSplitDomain = linkSplitStr[0].split(".").reverse();
-    // console.log(linkSplitDomain);
-
-    domainLenght = linkSplitDomain.length;
-
-    if (linkSplitDomain[1] == 'co') {
-        domainLenght--;
-    }
-
-    for (i = 1; i < domainLenght; i++) {
-        count_domain++;
-    }
-
-    // console.log(linkSplitDomain.length);
-    // console.log(domainLenght);
-    // console.log(count_domain);
-    if (count_domain == 1){
-        number_of_domain = 'Satu domain';
-    } else if (count_domain == 2){
-        number_of_domain = 'Dua domain';
-    } else {
-        number_of_domain = 'Lebih dari dua domain';
-    }
-    return (number_of_domain);
-}
-
-function numberOfThirdPartyDomain(url){
+function numberOfThirdPartyDomain(url) {
     var linkSplit = url.split("//");
     // console.log(linkSplit);
 
     var check = 0;
-    for (i = 1; i < linkSplit.length; i++){
-        if (linkSplit[i].includes("http") || linkSplit[i].includes("https")){
+    for (i = 1; i < linkSplit.length; i++) {
+        if (linkSplit[i].includes("http") || linkSplit[i].includes("https")) {
             check = 1;
             break;
         }
     }
 
-    if (check == 1){
+    if (check == 1) {
         thirdPartyDomain = "Ada third-party domain";
     } else {
         thirdPartyDomain = "Tidak ada third-party domain";
@@ -204,6 +170,23 @@ function javascriptMethod(url) {
     }
     return js_method;
 }
+
+function internetprotocoladdress(url_parser) {
+    try {
+        var res = url_parser.match(/^(http(s)?:\/\/.)?(www\.)?[0-9]*\.[0-9]*\.[0-9]*\.[0-9.]*[a-zA-Z0-9@:%_\+.~#?&//=]*/g);
+        result = (res !== null);
+        var ipaddress = "";
+        if (result == true) {
+            ipaddress = "Terdapat IP Address";
+        } else {
+            ipaddress = "Tidak ada IP Address";
+        }
+        return (ipaddress);
+    } catch (err) {
+        console.log(err);
+    }
+}
+
 
 async function features(url) {
     var dom = await htmlParser.DOM_parser(url);
