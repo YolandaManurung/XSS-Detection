@@ -1,21 +1,23 @@
 {
-  "name": "gollum15",
+  "name": "ITD-STU",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "body-parser": "^1.19.0",
+    "cheerio": "^1.0.0-rc.5",
+    "express": "^4.17.1",
+    "mysql": "^2.17.1",
+    "pkg": "^4.4.9",
+    "puppeteer": "^8.0.0",
+    "react": "^17.0.1"
+  },
+  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "brfs": "^2.0.2",
-    "browserify-fs": "^1.0.0",
-    "c5.0": "^0.0.3",
-    "file-saver": "^2.0.2",
-    "fs": "0.0.1-security",
-    "fs-extra": "^9.0.0",
-    "papaparse": "^5.3.0",
-    "sweetalert2": "^9.17.2"
-  }
+  "description": ""
 }
