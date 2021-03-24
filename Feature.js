@@ -1,4 +1,4 @@
-const urlParser = require('./urlParser');
+const urlParser = require('./URLParser');
 const htmlParser = require('./htmlParser');
 const apiWHOIS = require('./apiWHOIS');
 
@@ -54,22 +54,33 @@ async function AbnormalURL(urlInWHOISInfo) {
 }
 
 function obfuscatedCode(url) {
+    var uri = decodeURI(url);
+    var uriComp = decodeURIComponent(url);
+    var base = url.slice(-2);
+    var unesc = unescape(url);
 
+    if (url == uri || url == uriComp || base == "==" || url.charAt(url.length-1) == "=" || url == unesc){
+        obfucation_url = "Tidak obfuscated";
+    } else {
+        obfucation_url = "Ada obfuscated";
+    }
+    return obfucation_url;
 }
 
-function numberOfThirdPartyDomain(url) {
-    var linkSplit = url.split("//");
-    // console.log(linkSplit);
+function numberOfThirdPartyDomain(url){
+    var urls = decodeURIComponent(url)
+    var urlSplit = urls.split(/\/\/(.+)/)[1];
+    var linkSplitStr = urlSplit.split(/\/(.+)/);
 
     var check = 0;
-    for (i = 1; i < linkSplit.length; i++) {
-        if (linkSplit[i].includes("http") || linkSplit[i].includes("https")) {
+    for (i = 1; i < linkSplitStr.length; i++){
+        if ((linkSplitStr[i].includes("http") || linkSplitStr[i].includes("https"))){
             check = 1;
             break;
         }
     }
 
-    if (check == 1) {
+    if (check == 1){
         thirdPartyDomain = "Ada third-party domain";
     } else {
         thirdPartyDomain = "Tidak ada third-party domain";
@@ -77,25 +88,30 @@ function numberOfThirdPartyDomain(url) {
     return thirdPartyDomain;
 }
 
-function requestForCookie(url) {
-    var cookie = url.include("cookie");
-    if (cookie == true) {
+function requestForCookie(url){
+    var cookie = url.includes("cookie");
+    if (cookie == true){
         url_cookie = 'Ada request cookie';
     } else {
         url_cookie = 'Tidak ada request cookie';
     }
+    return url_cookie;
 }
 
-function htmlTags(url) {
-    var tags = new Array("<script>", "<iframe>", "<meta>", "<form>", "<img>", "<textarea>", "<div>");
-    var index, check = 0;
-    for (index = 0; index < tags.length; index++) {
-        if (url.include(tags[index])) {
+function htmlTags(url){
+    var tags = new Array ("<script>", "<iframe", "<meta", "<h1",
+                          "<form", "<img", "<textarea", "<div",
+                          "<title", "<style", "<object", "<a", "<br>");
+
+    var check = 0;
+    for (i = 0; i < tags.length; i++){
+        if (url.toLowerCase().includes(tags[i])){
             check = 1;
             break;
         }
     }
-    if (check == 1) {
+
+    if (check == 1){
         tag_html = 'Terdapat HTML tags';
     } else {
         tag_html = 'Tidak ada HTML tags';
@@ -103,16 +119,18 @@ function htmlTags(url) {
     return tag_html;
 }
 
-function htmlProperties(url) {
-    var properties = new Array('href', 'http-equiv', 'action', 'src', 'lowsrc');
-    var index, check = 0;
-    for (index = 0; index < properties.length; index++) {
-        if (url.include(properties[index])) {
+function htmlProperties(url){
+    var properties = new Array ('href', 'http-equiv', 'action', 'language', 'src', 'lowsrc', 'type');
+
+    var check = 0;
+    for (i = 0; i < properties.length; i++){
+        if (url.includes(properties[i])){
             check = 1;
             break;
         }
     }
-    if (check == 1) {
+
+    if (check == 1){
         properties_html = 'Terdapat HTML properties';
     } else {
         properties_html = 'Tidak ada HTML properties';
@@ -120,16 +138,18 @@ function htmlProperties(url) {
     return properties_html;
 }
 
-function eventHandler(url) {
-    var event = new Array('onclick', 'onmouseover', 'onerror', 'onload', 'onfocus');
-    var index, check = 0;
-    for (index = 0; index < event.length; index++) {
-        if (url.include(event[index])) {
+function eventHandler(url){
+    var event = new Array ('onclick', 'onmouseover', 'onerror', 'onload', 'onfocus');
+
+    var check = 0;
+    for (i = 0; i < event.length; i++){
+        if (url.includes(event[i])){
             check = 1;
             break;
         }
     }
-    if (check == 1) {
+
+    if (check == 1){
         handler = 'Terdapat EventHandler';
     } else {
         handler = 'Tidak ada EventHandler';
@@ -137,16 +157,18 @@ function eventHandler(url) {
     return handler;
 }
 
-function domObjects(url) {
-    var objects = new Array('windows', 'location', 'document');
-    var index, check = 0;
-    for (index = 0; index < objects.length; index++) {
-        if (url.include(objects[index])) {
+function domObjects(url){
+    var objects = new Array ('windows', 'location', 'document');
+
+    var check = 0;
+    for (i = 0; i < objects.length; i++){
+        if (url.toLowerCase().includes(objects[i])){
             check = 1;
             break;
         }
     }
-    if (check == 1) {
+
+    if (check == 1){
         objects_dom = 'Terdapat DOM objects';
     } else {
         objects_dom = 'Tidak ada DOM objects';
@@ -154,16 +176,18 @@ function domObjects(url) {
     return objects_dom;
 }
 
-function javascriptMethod(url) {
-    var method = new Array('write', 'getElementsByTagName', 'alert', 'eval', 'fromCharCode');
-    var index, check = 0;
-    for (index = 0; index < method.length; index++) {
-        if (url.include(method[index])) {
+function javascriptMethod(url){
+    var method = new Array ('write(', 'getElementsByTagName(', 'alert(', 'eval(', 'fromCharCode(');
+
+    var check = 0;
+    for (i = 0; i < method.length; i++){
+        if (url.includes(method[i])){
             check = 1;
             break;
         }
     }
-    if (check == 1) {
+
+    if (check == 1){
         js_method = 'Terdapat javascript method';
     } else {
         js_method = 'Tidak ada javascript method';
@@ -171,7 +195,7 @@ function javascriptMethod(url) {
     return js_method;
 }
 
-function internetprotocoladdress(url_parser) {
+function IPAddress(url_parser) {
     try {
         var res = url_parser.match(/^(http(s)?:\/\/.)?(www\.)?[0-9]*\.[0-9]*\.[0-9]*\.[0-9.]*[a-zA-Z0-9@:%_\+.~#?&//=]*/g);
         result = (res !== null);
@@ -198,12 +222,15 @@ async function features(url) {
     // console.log(api_whois);
     // console.log(api_wot);
 
-    let abnormal_URL = await AbnormalURL(api_whois);
+    // let request_URL = requestURL_CrossSite(dom.dom, domain);
+
+    let ip_address = IPAddress(parser.hostname);
     let length_URL = URLLength(url);
-    let request_cookie = requestForCookie(url);
-    let request_URL = requestURL_CrossSite(dom.dom, domain);
-    let number_of_subdomain = numberOfThirdsPartyDomain(url);
+    let abnormal_URL = await AbnormalURL(api_whois);
+    let obfuscated_URL = obfuscatedCode(url);
     let URL_of_SFH = ServerFormHandler(dom.dom, domain);
+    let request_cookie = requestForCookie(url);
+    let number_of_subdomain = numberOfThirdPartyDomain(url);
     let html_tags = htmlTags(url);
     let html_properties = htmlProperties(url);
     let event_handler = eventHandler(url);
@@ -211,17 +238,18 @@ async function features(url) {
     let javascript_method = javascriptMethod(url);
 
     var all_features = [];
-    await all_features.push(request_URL,
-        length_URL,
-        URL_of_SFH,
-        number_of_subdomain,
-        abnormal_URL,
-        request_cookie,
-        html_tags,
-        html_properties,
-        event_handler,
-        dom_objects,
-        javascript_method);
+    await all_features.push(ip_address,             // 1
+                            length_URL,             // 2
+                            abnormal_URL,           // 3
+                            obfuscated_URL,         // 4
+                            URL_of_SFH,             // 5
+                            request_cookie,         // 6
+                            number_of_subdomain,    // 7
+                            html_tags,              // 8
+                            html_properties,        // 9
+                            event_handler,          // 10
+                            dom_objects,            // 11
+                            javascript_method);     // 12
 
     return all_features;
 }

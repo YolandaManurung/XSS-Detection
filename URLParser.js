@@ -7,7 +7,7 @@ function domainURL(link) {
     var parser = convertToURL(link);
     var host = '';
     var hn = parser.hostname.split('.').reverse();
-    if (hn[1] == 'co') {
+    if (hn[1] == 'co' || hn[1] == "org") {
         host = hn[2] + '.' + hn[1] + '.' + hn[0];
     } else {
         host = hn[1] + '.' + hn[0];
