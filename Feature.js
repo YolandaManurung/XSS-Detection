@@ -211,6 +211,44 @@ function IPAddress(url_parser) {
     }
 }
 
+function specialCharacter(url){
+    var special = new Array ('</', '">', '/*', '(', ')', '&', '"/>');
+
+    var check = 0;
+    for (i = 0; i < special.length; i++){
+        if (url.includes(special[i])){
+            check = 1;
+            break;
+        }
+    }
+
+    if (check == 1){
+        specialchar = 'Terdapat special character';
+    } else {
+        specialchar = 'Tidak ada special character';
+    }
+    return specialchar;
+}
+
+function duplicateCharacter(url){    
+    var duplicate = new Array ('///', '<<', '>>', '((', '))');
+
+    var check = 0;
+    for (i = 0; i < duplicate.length; i++){
+        if (url.includes(duplicate[i])){
+            check = 1;
+            break;
+        }
+    }
+
+    if (check == 1){
+        duplicatechar = 'Terdapat duplicate character';
+    } else {
+        duplicatechar = 'Tidak ada duplicate character';
+    }
+    return duplicatechar;
+}
+
 
 async function features(url) {
     var dom = await htmlParser.DOM_parser(url);
@@ -236,6 +274,8 @@ async function features(url) {
     let event_handler = eventHandler(url);
     let dom_objects = domObjects(url);
     let javascript_method = javascriptMethod(url);
+    let special_character = specialCharacter(url);
+    let duplicate_character = duplicateCharacter(url);
 
     var all_features = [];
     await all_features.push(ip_address,             // 1
@@ -249,7 +289,9 @@ async function features(url) {
                             html_properties,        // 9
                             event_handler,          // 10
                             dom_objects,            // 11
-                            javascript_method);     // 12
+                            javascript_method,      // 12
+                            special_character,
+                            duplicate_character);     
 
     return all_features;
 }
