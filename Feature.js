@@ -195,22 +195,6 @@ function javascriptMethod(url){
     return js_method;
 }
 
-function IPAddress(url_parser) {
-    try {
-        var res = url_parser.match(/^(http(s)?:\/\/.)?(www\.)?[0-9]*\.[0-9]*\.[0-9]*\.[0-9.]*[a-zA-Z0-9@:%_\+.~#?&//=]*/g);
-        result = (res !== null);
-        var ipaddress = "";
-        if (result == true) {
-            ipaddress = "Terdapat IP Address";
-        } else {
-            ipaddress = "Tidak ada IP Address";
-        }
-        return (ipaddress);
-    } catch (err) {
-        console.log(err);
-    }
-}
-
 function specialCharacter(url){
     var special = new Array ('</', '">', '/*', '(', ')', '&', '"/>');
 
@@ -249,6 +233,22 @@ function duplicateCharacter(url){
     return duplicatechar;
 }
 
+function nonStandardPort(url){
+    try {
+        var res = url.match(/^(http(s)?:\/\/.)?(www\.)?[0-9999]*[a-zA-Z0-9@:%_\+.~#?&//=]*/g);
+        result = (res !== null);
+        var port = "";
+        if (result == true) {
+            port = "Terdapat port"; 
+        } else {
+            port = "Tidak ada port";
+        }
+        return (port);
+    } catch (err) {
+        console.log(err);
+    }
+}
+
 
 async function features(url) {
     var dom = await htmlParser.DOM_parser(url);
@@ -262,7 +262,6 @@ async function features(url) {
 
     // let request_URL = requestURL_CrossSite(dom.dom, domain);
 
-    let ip_address = IPAddress(parser.hostname);
     let length_URL = URLLength(url);
     let abnormal_URL = await AbnormalURL(api_whois);
     let obfuscated_URL = obfuscatedCode(url);
@@ -276,22 +275,23 @@ async function features(url) {
     let javascript_method = javascriptMethod(url);
     let special_character = specialCharacter(url);
     let duplicate_character = duplicateCharacter(url);
+    let non_standard_port = nonStandardPort(url);
 
     var all_features = [];
-    await all_features.push(ip_address,             // 1
-                            length_URL,             // 2
-                            abnormal_URL,           // 3
-                            obfuscated_URL,         // 4
-                            URL_of_SFH,             // 5
-                            request_cookie,         // 6
-                            number_of_subdomain,    // 7
-                            html_tags,              // 8
-                            html_properties,        // 9
-                            event_handler,          // 10
-                            dom_objects,            // 11
-                            javascript_method,      // 12
-                            special_character,
-                            duplicate_character);     
+    await all_features.push(length_URL,             // 1
+                            abnormal_URL,           // 2
+                            obfuscated_URL,         // 3
+                            URL_of_SFH,             // 4
+                            request_cookie,         // 5
+                            number_of_subdomain,    // 6
+                            html_tags,              // 7
+                            html_properties,        // 8
+                            event_handler,          // 9
+                            dom_objects,            // 10
+                            javascript_method,      // 11
+                            special_character,      // 12
+                            duplicate_character,    // 13
+                            non_standard_port);     // 14
 
     return all_features;
 }

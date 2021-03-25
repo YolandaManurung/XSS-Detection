@@ -1,9 +1,9 @@
 	-- Feature Code Done --
 URL Length				v
-Server Form Handler (<a href)			? (sosmed ikut?)
+Server Form Handler (<a href)		v
 Abnormal URL (whois)			v
-Obfuscated Code
-Number of Third Party Domain
+Obfuscated Code				v
+Number of Third Party Domain		v
 Request for Cookie			v
 Google index (linkody)
 HTML tags				v
@@ -11,3 +11,6 @@ HTML properties				v
 EventHandler				v
 DOM Object				v
 JavaScript method			v
+Special Char				v
+Duplicate Char				v
+Non Standard Port			v
