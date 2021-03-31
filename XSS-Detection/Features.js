@@ -58,7 +58,7 @@ function URLLength(url){
 
 function nonStandardPort(url){
     try {
-        var res = url.match(/^(http(s)?:\/\/.)?(www\.)?[0-9999]*[a-zA-Z0-9@:%_\+.~#?&//=]*/g);
+        var res = url.match(/^((https?:\/\/)|(www.))(?:([a-zA-Z]+)|(\d+\.\d+.\d+.\d+)):\d{4}$/g);
         result = (res !== null);
         var port = "";
         if (result == true) {
@@ -111,6 +111,10 @@ function duplicateCharacter(url){
 }
 
 function ServerFormHandler(parser) {
+    if (!parser) {
+        return "Blank atau CTO";
+    }
+
     const anchors = parser.getElementsByTagName('a');
     var check = 0;
     for (let anchor of anchors) {
@@ -130,6 +134,8 @@ function ServerFormHandler(parser) {
 
     if (check == 1) {
         urlOfServerFormHandler = 'Mengarah ke domain berbeda';
+    } else if (!parser) {
+        urlOfServerFormHandler = "Blank atau CTO";
     } else {
         urlOfServerFormHandler = 'Mengarah ke domain sendiri'
     }
@@ -334,7 +340,7 @@ function javascriptMethod(url){
     // return all_features;
     console.log(all_features);
 
-    await fileSystem.readFile('datasetNew.csv', 'utf-8', function(err, data) {
+    await fileSystem.readFile('DatasetNew(final).csv', 'utf-8', function(err, data) {
         if (err) {
             console.log(err);
             return false;
@@ -366,14 +372,20 @@ function javascriptMethod(url){
                     }
                     if (model.classify(all_features) == 'XSS') {
                         swal.fire ({
-                            imageUrl: 'https://www.pngkey.com/png/full/881-8812373_open-warning-icon-png.png',
-                            imageWidth: 50,
-                            imageHeight: 50,
-                            imageAlt: 'Image Warning',
+                            icon: 'warning',
                             title: 'This website has XSS attack!',
-                            text: "Please don't visit this website, it can steal your data."
+                            html: "<b>It can steal your data.</b> Want to visit this website?",
+                            showCancelButton: true,
+                            cancelButtonText: "Yes",
+                            confirmButtonText: "No",
+                            reverseButtons: true
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = "javascript:history.back()";
+                            }
                         });
                     }
+                    console.log(model.classify(all_features));
                 });
             }
         });
