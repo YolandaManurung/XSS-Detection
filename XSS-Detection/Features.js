@@ -2,23 +2,14 @@ const C45 = require('c4.5');
 const fileSystem = require('fs');
 const CSVparser = require('papaparse');
 const swal = require('sweetalert2');
+const { requestUrl, compareUrl } = require('./url-encoder'); // Encoding functions
 
 const apiWHOIS = 'https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=at_MUU77fxi6N57F5pnrN9dyXyK5K4Sn&outputFormat=JSON&domainName=';
+var scraperapiClient = require('scraperapi-sdk')('c7750f83e263808680535aa227aa5244')
+
 
 const url = window.location.href;
-const parser = new URL(url);
-
-function domainURL(link) {
-    var parser = new URL(link);
-    var host = '';
-    var hn = parser.hostname.split('.').reverse();
-    if (hn[1] == 'co' || hn[1] == "org") {
-        host = hn[2] + '.' + hn[1] + '.' + hn[0];
-    } else {
-        host = hn[1] + '.' + hn[0];
-    }
-    return host;
-}
+const newUrl = new URL(url);
 
 function isValidURL(string) {
     var res = string.match(/^(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
@@ -42,6 +33,18 @@ async function DOM_parser(){
 
 function isNumeric(n) {
     return !isNaN(n);
+}
+
+function matchResponse(url, res, compare, utfEncoded) {
+    let matchURL = false
+
+    if (url.includes(`'`)) {
+      matchURL = (res.includes(`href="${compare}"`) | res.includes(`href="${utfEncoded}"`));
+    } else {
+      matchURL = res.includes(`href="${compare}"`);
+    }
+
+    return matchURL
 }
 
 function URLLength(url){
@@ -73,7 +76,7 @@ function nonStandardPort(url){
 }
 
 function specialCharacter(url){
-    var special = new Array ('</', '">', '/*', '(', ')', '&', '"/>');
+    var special = new Array ('*', '|', ';', '{', '}', '<', '>', '[', ']', '(', ')');
 
     var check = 0;
     for (i = 0; i < special.length; i++){
@@ -92,7 +95,7 @@ function specialCharacter(url){
 }
 
 function duplicateCharacter(url){    
-    var duplicate = new Array ('///', '<<', '>>', '((', '))');
+    var duplicate = new Array ('///', '<<', '>>', '((', '))', '--');
 
     var check = 0;
     for (i = 0; i < duplicate.length; i++){
@@ -103,9 +106,9 @@ function duplicateCharacter(url){
     }
 
     if (check == 1){
-        duplicatechar = 'Terdapat duplicate character';
+        duplicatechar = 'Terdapat duplicated character';
     } else {
-        duplicatechar = 'Tidak ada duplicate character';
+        duplicatechar = 'Tidak ada duplicated character';
     }
     return duplicatechar;
 }
@@ -122,8 +125,10 @@ function ServerFormHandler(parser) {
         if (href) {
             getDomainFromAnchor = isValidURL(href.value);
             if (getDomainFromAnchor == true) {
-                var url_domain = domainURL(url);
-                var getDomainFromAnchor = domainURL(href.value);
+                var url_domain = newUrl.host;
+                const anchorUrl = new URL(href.value);
+                var getDomainFromAnchor = anchorUrl.host;
+                console.log(getDomainFromAnchor);
                 if (getDomainFromAnchor != url_domain) {
                     check = 1;
                     break;
@@ -134,16 +139,14 @@ function ServerFormHandler(parser) {
 
     if (check == 1) {
         urlOfServerFormHandler = 'Mengarah ke domain berbeda';
-    } else if (!parser) {
-        urlOfServerFormHandler = "Blank atau CTO";
     } else {
         urlOfServerFormHandler = 'Mengarah ke domain sendiri'
     }
     return urlOfServerFormHandler;
 }
 
-async function AbnormalURL() {
-    var domainurl = domainURL(url);
+async function AbnormalURL(url) {
+    var domainurl = newUrl.host;
     let response = await fetch(apiWHOIS + domainurl);   
     let urlInWHOISInfo = await response.json();
     if (urlInWHOISInfo) {
@@ -162,10 +165,10 @@ async function AbnormalURL() {
 function obfuscatedURL(url){
     var uri = decodeURI(url);
     var uriComp = decodeURIComponent(url);
-    var base = url.slice(-2);
     var unesc = unescape(url);
+    var base = url.slice(-2);
 
-    if (url == uri || url == uriComp || base == "==" || url.charAt(url.length-1) == "=" || url == unesc){
+    if (url == uri || url == uriComp || base != "==" || url.charAt(url.length-1) != "=" || url.includes(".fromCharCode(") || url == unesc){
         deobfucation_url = "Tidak obfuscated";
     } else {
         deobfucation_url = "Ada obfuscated";
@@ -204,8 +207,33 @@ function requestForCookie(url){
     return url_cookie;
 }
 
+async function googleIndex(url) {
+    const request = requestUrl(url);
+    const compare = compareUrl(url, false);
+    const utfEncoded = compareUrl(url, true);
+
+    var response = await scraperapiClient.get(request);
+    console.log(response);
+
+    const indexation = matchResponse(url, response, compare, utfEncoded)
+        ? 'Indexed'
+        : 'Not Indexed'
+
+    console.log(indexation);
+
+    if (indexation == "Indexed") {
+        google_indexing = "Halaman dan domain terdaftar";
+    } else if (indexation == "Not Indexed") {
+        google_indexing = "Domain tidak terdaftar di google index";
+    } else {
+        google_indexing = "Halaman tidak terdaftar di google index";
+    }
+
+    return google_indexing;
+}
+
 function htmlTags(url){
-    var tags = new Array ("<script>", "<iframe", "<meta", "<h1",
+    var tags = new Array ("<script", "<iframe", "<meta", "<h1",
                           "<form", "<img", "<textarea", "<div",
                           "<title", "<style", "<object", "<a", "<br>");
 
@@ -226,7 +254,7 @@ function htmlTags(url){
 }
 
 function htmlProperties(url){
-    var properties = new Array ('href', 'http-equiv', 'action', 'src', 'lowsrc');
+    var properties = new Array ('href=', 'http-equiv=', 'action=', 'src=', 'lowsrc=');
 
     var check = 0;
     for (i = 0; i < properties.length; i++){
@@ -245,7 +273,7 @@ function htmlProperties(url){
 }
 
 function eventHandler(url){
-    var event = new Array ('onclick', 'onmouseover', 'onerror', 'onload', 'onfocus');
+    var event = new Array ('onclick=', 'onmouseover=', 'onerror=', 'onload=', 'onfocus=');
 
     var check = 0;
     for (i = 0; i < event.length; i++){
@@ -264,7 +292,8 @@ function eventHandler(url){
 }
 
 function domObjects(url){
-    var objects = new Array ('windows', 'location', 'document');
+    var objects = new Array ('window.', 'location.', 'document.',
+                             'history.', 'navigator.');
 
     var check = 0;
     for (i = 0; i < objects.length; i++){
@@ -283,7 +312,8 @@ function domObjects(url){
 }
 
 function javascriptMethod(url){
-    var method = new Array ('write(', 'getElementsByTagName(', 'alert(', 'eval(', 'fromCharCode(');
+    var method = new Array ('write(', 'getElementsByTagName(', 'alert(',
+                            'eval(', 'open(', 'fromCharCode(');
 
     var check = 0;
     for (i = 0; i < method.length; i++){
@@ -309,11 +339,11 @@ function javascriptMethod(url){
     let special_character = specialCharacter(url);
     let duplicated_character = duplicateCharacter(url);
     let URL_of_SFH = ServerFormHandler(dom.dom);
-    let abnormal_URL = await AbnormalURL();
+    let abnormal_URL = await AbnormalURL(url);
     let obfuscated_URL = obfuscatedURL(url);
     let number_of_subdomain = numberOfThirdPartyDomain(url);
     let request_cookie = requestForCookie(url);
-    // let google_index = googleIndex(url);
+    let google_index = await googleIndex(url);
     let html_tags = htmlTags(url);
     let html_properties = htmlProperties(url);
     let event_handler = eventHandler(url);
@@ -330,17 +360,16 @@ function javascriptMethod(url){
                             obfuscated_URL,
                             number_of_subdomain,
                             request_cookie,
-                            // google_index,
+                            google_index,
                             html_tags,
                             html_properties,
                             event_handler,
                             dom_objects,
                             javascript_method);
 
-    // return all_features;
     console.log(all_features);
 
-    await fileSystem.readFile('DatasetNew(final).csv', 'utf-8', function(err, data) {
+    await fileSystem.readFile('DatasetNew(fin).csv', 'utf-8', function(err, data) {
         if (err) {
             console.log(err);
             return false;
