@@ -76,7 +76,9 @@ function nonStandardPort(url){
 }
 
 function specialCharacter(url){
-    var special = new Array ('*', '|', ';', '{', '}', '<', '>', '[', ']', '(', ')');
+    var special = new Array ('*', '|', ';', '{', '}', '<',
+                             '>', '[', ']', '(', ')', '"',
+                             "'", '^', ',');
 
     var check = 0;
     for (i = 0; i < special.length; i++){
@@ -95,7 +97,9 @@ function specialCharacter(url){
 }
 
 function duplicateCharacter(url){    
-    var duplicate = new Array ('///', '<<', '>>', '((', '))', '--');
+    var duplicate = new Array ('///', '<<', '>>', '((', '))',
+                               '--', '!!', '__', '==', ';;',
+                               '..', '[[', ']]');
 
     var check = 0;
     for (i = 0; i < duplicate.length; i++){
@@ -207,7 +211,7 @@ function requestForCookie(url){
     return url_cookie;
 }
 
-async function googleIndex(url) {
+async function scraping(url) {
     const request = requestUrl(url);
     const compare = compareUrl(url, false);
     const utfEncoded = compareUrl(url, true);
@@ -219,16 +223,20 @@ async function googleIndex(url) {
         ? 'Indexed'
         : 'Not Indexed'
 
-    console.log(indexation);
+    return indexation;
+}
 
-    if (indexation == "Indexed") {
+function googleIndex(url) {
+    const indexPage = scraping(url);
+    const indexDomain = scraping(newUrl.host);
+    
+    if (indexPage == "Indexed" && indexDomain == "Indexed") {
         google_indexing = "Halaman dan domain terdaftar";
-    } else if (indexation == "Not Indexed") {
+    } else if (indexPage == "Not Indexed" && indexDomain == "Not Indexed") {
         google_indexing = "Domain tidak terdaftar di google index";
     } else {
         google_indexing = "Halaman tidak terdaftar di google index";
     }
-
     return google_indexing;
 }
 

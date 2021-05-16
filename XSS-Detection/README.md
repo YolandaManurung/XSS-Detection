@@ -15,3 +15,10 @@ npm i sweetalert2
 
 ### How to run:
 ```browserify Features.js -o dist/features.js -t brfs```
+
+### Setting
+Pada manifest.json, ubah baris "js" menjadi
+```"js" : ["dist/features.js"]```
+
+Pada package.json, ubah baris "main" menjadi
+```"main": "Features.js"```
