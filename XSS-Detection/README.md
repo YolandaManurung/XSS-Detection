@@ -11,6 +11,7 @@ npm i browserify
 npm i c4.5
 npm i papaparse
 npm i sweetalert2
+npm i scraperapi-sdk
 ```
 
 ### How to run:
