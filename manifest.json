@@ -1,10 +1,14 @@
 {
-    "name": "Detecting XSS Website using C4.5",
-    "version": "1.0",
-    "manifest_version": 1,
-    "description": "Build an Extension for Detecting XSS",
-    "content_scripts": [{
-        "matches": ["<all_urls>"],
-        "js": [" "]
-    }]
-}
+    "name": "XSS Detection",
+    "version": "0.1",
+    "manifest_version": 2,
+    "description": "Build an Extension!",
+    "content_scripts":[
+      {
+        "matches" : ["<all_urls>"],
+        "js" : ["dist/features.js"]
+      }
+    ]
+  }
+  
+  

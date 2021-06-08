@@ -1,8 +1,16 @@
 async function DOM_parser(){
-    var string = document.documentElement.outerHTML;
     const parsers = new DOMParser();
-    var dom = parsers.parseFromString(string, 'text/html');
-    return { string: string, dom: dom }
+    var response = await fetch(url);
+    switch (response.status) {
+        case 200:
+            var string = await response.text();
+            var dom = parsers.parseFromString(string, 'text/html');
+            break;
+        case 404:
+            // console.log('Not Found');
+            break;
+    }
+    return {string: string, dom: dom}
 }
 
 module.exports = { DOM_parser };

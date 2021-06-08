@@ -1,23 +1,21 @@
 {
-  "name": "ITD-STU",
+  "name": "XSS-Detect",
   "version": "1.0.0",
-  "main": "index.js",
-  "dependencies": {
-    "axios": "^0.21.1",
-    "body-parser": "^1.19.0",
-    "cheerio": "^1.0.0-rc.5",
-    "express": "^4.17.1",
-    "mysql": "^2.17.1",
-    "pkg": "^4.4.9",
-    "puppeteer": "^8.0.0",
-    "react": "^17.0.1"
-  },
-  "devDependencies": {},
+  "description": "",
+  "main": "Features.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "dependencies": {
+    "brfs": "^2.0.2",
+    "browserify": "^17.0.0",
+    "c4.5": "0.0.3",
+    "lite-server": "^2.6.1",
+    "papaparse": "^5.3.0",
+    "scraperapi-sdk": "^1.0.6",
+    "sweetalert2": "^10.16.2"
+  }
 }
