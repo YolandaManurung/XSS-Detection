@@ -1,18 +1,34 @@
-const allFeatures = require('./Features');
-const urlParser = require('./urlParser');
+const Features = require('./Features');
+const htmlParser = require('./htmlParser');
+const cookies = require('./cookies');
 const C45 = require('c4.5');
 const fileSystem = require('fs');
 const CSVparser = require('papaparse');
 const swal = require('sweetalert2');
-const cookies = require('./cookies');
 
 function isNumeric(n) {
     return !isNaN(n);
 }
 
+async function getScript() {
+    var dom = await htmlParser.DOM_parser();
+    if (!dom.string) {
+        return "Tidak ada javascript sus";
+    }
+
+    if (dom.string.includes('script>')) {
+        js_script = "Ada";
+    } else {
+        js_script = "Tidak";
+    }
+
+    return js_script;
+}
+
 (async () => {
     const url = window.location.href;
     const newUrl = new URL(url);
+    var get_script = await getScript();
     var domain = newUrl.host;
     var cookie = cookies.getCookie(domain);
     
@@ -37,8 +53,8 @@ function isNumeric(n) {
     } else {
         console.log(cookie);
         console.log("Processing the detection..")
-        var getFeatures = await allFeatures.features(url);
-        
+        var getFeatures = await Features.features(url);
+        console.log(getFeatures);
         await fileSystem.readFile('DatasetNew(fin).csv', 'utf-8', function(err, data) {
             if (err) {
                 console.log(err);
@@ -69,7 +85,9 @@ function isNumeric(n) {
                         if (error) {
                             console.error(error);
                         }
-                        if (model.classify(all_features) == 'XSS') {
+                        console.log(model.classify(getFeatures));
+                        cookies.setCookie(domain, model.classify(getFeatures), 1);
+                        if (model.classify(getFeatures) == 'XSS' && get_script == 'Ada') {
                             swal.fire ({    
                                 icon: 'warning',
                                 title: 'This website has XSS attack!',
@@ -83,7 +101,6 @@ function isNumeric(n) {
                                     window.location.href = "javascript:history.back()";
                                 }
                             });
-                            console.log(model.classify(all_features));
                         }
                     });
                 }
