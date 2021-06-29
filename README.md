@@ -6,9 +6,9 @@ The extension is built using the WHOIS API and Scraper API, so you should obtain
 
 Please contact the developer to obtain further information
 ```
-Yolanda :yolanda.romaulimm@gmail.com
-Stella : stellasitinjak12@gmail.com
-Ekis : ekisnaomilasma22@gmail.com
+Yolanda : yolanda.romaulimm@gmail.com
+Stella  : stellasitinjak12@gmail.com
+Ekis    : ekisnaomilasma22@gmail.com
 ```
 
 Thankyou.
