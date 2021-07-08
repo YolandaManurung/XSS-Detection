@@ -1,8 +1,38 @@
-const htmlParser = require('./htmlParser');
-const apiWHOIS = require('./apiWHOIS');
-const apiGoogleIndex = require('./apiGoogleIndex');
-const ngram = require('./ngram');
-const payload = require('./payload');
+const C45 = require('c4.5');
+const fileSystem = require('fs');
+const CSVparser = require('papaparse');
+const swal = require('sweetalert2');
+
+var scraperapiClient = require('scraperapi-sdk')('cfe85b2c97eb745f9b899e6147a4ddf0')
+const { requestUrl, compareUrl } = require('./url-encoder'); // Encoding functions
+const { payload } = require('./payload');
+const { url } = require('inspector');
+const apiWHOIS = 'https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=at_GPYdwM0FKzQ3OC5Dx9dHljb1Fl1i2&outputFormat=JSON&domainName=';
+
+const urlWindow = window.location.href;
+const newUrl = new URL(urlWindow);
+
+function setCookie(cookie_name, cookie_value, expires_days) {
+    var date_now = new Date();
+    date_now.setTime(date_now.getTime() + (expires_days * 24 * 60 * 60 * 1000));
+    var expires_time = "expires="+date_now.toUTCString();
+    document.cookie = cookie_name + "=" + cookie_value + ";" + expires_time + ";path=/";
+}
+  
+function getCookie(cookie_name) {
+  var get_cname = cookie_name + "=";
+  var cookie_split = document.cookie.split(';');
+  for(var i = 0; i < cookie_split.length; i++) {
+    var cookies = cookie_split[i];
+    while (cookies.charAt(0) == ' ') {
+      cookies = cookies.substring(1);
+    }
+    if (cookies.indexOf(get_cname) == 0) {
+      return cookies.substring(get_cname.length, cookies.length);
+    }
+  }
+  return "";
+}
 
 function isValidURL(string) {
     try {
@@ -14,6 +44,78 @@ function isValidURL(string) {
 
     return (res !== null);
 };
+
+async function DOM_parser(url){
+    const parsers = new DOMParser();
+
+    try {
+        var response = await fetch(url, {
+            mode: 'no-cors',
+            headers: {
+                'Access-Control-Allow-Origin':'*'
+            }
+        });
+    } catch (_) {
+        return false;
+    }
+
+    switch (response.status) {
+        case 200:
+            var string = await response.text();
+            var dom = parsers.parseFromString(string, 'text/html');
+            break;
+        case 404:
+            return false;
+    }
+
+    return {string: string, dom: dom}
+}
+
+function isNumeric(n) {
+    return !isNaN(n);
+}
+
+function matchResponse(url, res, compare, utfEncoded) {
+    let matchURL = false
+
+    if (url.includes(`'`)) {
+      matchURL = (res.includes(`href="${compare}"`) | res.includes(`href="${utfEncoded}"`));
+    } else {
+      matchURL = res.includes(`href="${compare}"`);
+    }
+
+    return matchURL
+}
+async function connectionGoogleIndex(url) {
+    const request = requestUrl(url);
+    const compare = compareUrl(url, false);
+    const utfEncoded = compareUrl(url, true);
+
+    var response = await scraperapiClient.get(request);
+
+    const indexation = matchResponse(url, response, compare, utfEncoded)
+        ? 'Indexed'
+        : 'Not Indexed'
+
+    return indexation;
+}
+
+function ngram(str) {
+    var ngram_list = [];
+    var urlSplit = str.split(/[^a-zA-Z0-9\/]/g);
+
+    var n = 0;
+    for (i = 0; i < urlSplit.length; i++) {
+        if (urlSplit[i] != "") {
+            ngram_list[n] = urlSplit[i];
+            n++;
+        }
+    }
+
+    return ngram_list;    
+}
+
+/////////////////////////////////////////////////////////////////
 
 function URLLength(url){
     var longCharacters = url.length;
@@ -28,6 +130,8 @@ function URLLength(url){
 }
 
 function nonStandardPort(){
+    // Note: If the port number is default (80 for http and 443
+    //       for https), most browsers will display 0 or nothing.
     var result = window.location.port;
 
     if (result == '') {
@@ -39,6 +143,9 @@ function nonStandardPort(){
 }
 
 function specialCharacter(url){
+    if (!url) {
+        return 'Tidak ada special character';
+    }
     var special = ['*', '|', ';', '{', '}', '<',
                    '>', '[', ']', '(', ')', '"',
                    "'", '^', ',', '%', '\"'];
@@ -52,7 +159,10 @@ function specialCharacter(url){
     return 'Tidak ada special character';
 }
 
-function duplicateCharacter(url){    
+function duplicateCharacter(url){
+    if (!url) {
+        return 'Tidak ada duplicated character';
+    }
     var duplicate = ['///', '--', '!!', '__', '==', ';;', '..'];
     var key1 = ['<<', '((', '[[', '""', "''"];
     var key2 = ['>>', '))', ']]', '""', "''"];
@@ -75,7 +185,7 @@ function ServerFormHandler(parser) {
     var safeDomain = ['facebook.com', 'instagram.com', 'twitter.com', 'youtube.com', 'linkedin.com', 'flickr.com'];
     for (let anchor of anchors) {
         let href = anchor.attributes.href;
-        var temp = 0;
+        var check = 0, temp = 0;
         if (href && isValidURL(href.value)) {
             var url_domain = newUrl.host;
             var anchorUrl = new URL(href.value);
@@ -87,15 +197,25 @@ function ServerFormHandler(parser) {
                 }
             };
             if (temp == 0 && getDomainFromAnchor != url_domain) {
-                return 'Mengarah ke domain berbeda';
+                check = 1;
+                break;
             }
         }
     }
 
-    return 'Mengarah ke domain sendiri'
+    if (check == 1) {
+        urlOfServerFormHandler = 'Mengarah ke domain berbeda';
+    } else {
+        urlOfServerFormHandler = 'Mengarah ke domain sendiri'
+    }
+    return urlOfServerFormHandler;
 }
 
 async function AbnormalURL() {
+    var domainurl = newUrl.host;
+    let response = await fetch(apiWHOIS + domainurl);   
+    let urlInWHOISInfo = await response.json();
+
     if (urlInWHOISInfo) {
         if (urlInWHOISInfo.WhoisRecord.dataError == "IN_COMPLETE_DATA" || urlInWHOISInfo.WhoisRecord.dataError == "MISSING_WHOIS_DATA" || urlInWHOISInfo.WhoisRecord.parseCode == 0) {
             urlInWHOIS = "Tidak tersimpan di database whois";
@@ -110,10 +230,19 @@ async function AbnormalURL() {
 }
 
 function obfuscatedURL(url){
+    if (!url) {
+        return "Tidak obfuscated";        
+    }
+
+    try {
+        var decodeURL = decodeURI(url);
+        var decodeCom = decodeURIComponent(url);
+    } catch (_) {}
+
     var base = url.slice(-2);
     var base64Matcher = new RegExp("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})$");
     
-    if (base === "==" || url.charAt(url.length-1) === "=" || url.includes(".fromCharCode(") || base64Matcher.test(url)) {
+    if (base === "==" || url.charAt(url.length-1) === "=" || url.includes(".fromCharCode(") || base64Matcher.test(url) || decodeURL != decodeCom) {
         deobfucation_url = "Ada obfuscated";
     } else {
         deobfucation_url = "Tidak obfuscated";
@@ -122,16 +251,21 @@ function obfuscatedURL(url){
 }
 
 function numberOfThirdPartyDomain(url){
+    if (!url) {
+        return "Tidak ada third-party domain";
+    }
+
     var linkSplitStr = unescape(url);
-    for (i = 1; i < linkSplitStr.length; i++){
-        if ((linkSplitStr[i].includes("http") || linkSplitStr[i].includes("https"))){
-            return "Ada third-party domain";
-        }
+    if ((linkSplitStr.includes("http") || linkSplitStr.includes("https"))){
+        return "Ada third-party domain";
     }
     return "Tidak ada third-party domain";
 }
 
 function requestForCookie(url){
+    if (!url) {
+        return 'Tidak ada request cookie';
+    }
     var cookie = url.includes("cookie");
     var session = url.includes("session");
 
@@ -143,7 +277,10 @@ function requestForCookie(url){
     return url_cookie;
 }
 
-async function googleIndex(indexPage, indexDomain) {    
+function googleIndex(url) {
+    const indexPage = connectionGoogleIndex(url);
+    const indexDomain = connectionGoogleIndex(newUrl.host);
+    
     if (indexPage == "Indexed" && indexDomain == "Indexed") {
         google_indexing = "Halaman dan domain terdaftar";
     } else if (indexPage == "Not Indexed" && indexDomain == "Not Indexed") {
@@ -155,84 +292,33 @@ async function googleIndex(indexPage, indexDomain) {
     return google_indexing;
 }
 
-function htmlTags(url_list){
-    var tags = ["script", "iframe", "meta",
-                "form", "img", "textarea",
-                "title", "div"," style", "marquee"];
+function tagsCode(url){
+    try {
+        url = decodeURI(url);
+    } catch (_) {}
+    url_list = ngram(url.toLowerCase());
+
+    if (!url_list) {
+        return 'Tidak ada tags';
+    }
+
+    var tags = ['script', 'iframe', 'meta', 'form', 'location',
+                'textarea', 'title', 'div', 'style', 'marquee',
+                'href', 'equiv', 'action', 'open', 'lowsrc',
+                'onclick', 'onmouseover', 'onerror', 'onload',
+                'onfocus', 'window', 'img', 'document', 'src',
+                'history', 'navigator','write', 'alert', 'eval',
+                'getElementsByTagName', 'fromCharCode'];
 
     for (i = 0; i < url_list.length; i++) {
         for (j = 0; j < tags.length; j++){
             if (url_list[i] === (tags[j])){
-                console.log("Tags: " + url_list[i]);
-                return 'Terdapat HTML tags';
+                return 'Terdapat tags';
             }
         }
     }
 
-    return 'Tidak ada HTML tags';
-}
-
-function htmlProperties(url_list){
-    var properties = ['href', 'equiv', 'action',
-                      'src', 'lowsrc'];
-
-    for (i = 0; i < url_list.length; i++) {
-        for (j = 0; j < properties.length; j++){
-            if (url_list[i] === (properties[j])){
-                console.log("Properties: " + url_list[i]);
-                return 'Terdapat HTML properties';
-            }
-        }    
-    }
-    return 'Tidak ada HTML properties';
-}
-
-function eventHandler(url_list){
-    var event = ['onclick', 'onmouseover', 'onerror',
-                 'onload', 'onfocus'];
-
-    for (i = 0; i < url_list.length; i++) {
-        for (j = 0; j < event.length; j++){
-            if (url_list[i] === (event[j])){
-                console.log("EventHandler: " + url_list[i]);
-                return 'Terdapat EventHandler';
-            }
-        }    
-    }
-
-    return 'Tidak ada EventHandler';
-}
-
-function domObjects(url_list){
-    var objects = ['window', 'location', 'document',
-                   'history', 'navigator'];
-
-    for (i = 0; i < url_list.length; i++) {
-        for (j = 0; j < objects.length; j++){
-            if (url_list[i] === (objects[j])){
-                console.log("DOM Object(s): " + url_list[i]);
-                return 'Terdapat DOM objects';
-            }
-        }    
-    }
-
-    return 'Tidak ada DOM objects';
-}
-
-function javascriptMethod(url_list){
-    var method = ['write', 'getElementsByTagName', 'alert',
-                  'eval', 'open', 'fromCharCode'];
-
-    for (i = 0; i < url_list.length; i++) {
-        for (j = 0; j < method.length; j++){
-            if (url_list[i] === (method[j])){
-                console.log("JS Method: " + url_list[i]);
-                return 'Terdapat javascript method';
-            }
-        }
-    }
-
-    return 'Tidak ada javascript method';
+    return 'Tidak ada tags';
 }
 
 function obfuscatedJS(parser) {
@@ -243,7 +329,7 @@ function obfuscatedJS(parser) {
     const scripts = parser.getElementsByTagName('script');
     for (var sscript of scripts) {
         var escapeJS = unescape(sscript);
-        if (escapeJS != sscript) {
+        if (escapeJS !== sscript) {
             return "Terdapat Obfus Js";
         }
     }
@@ -253,22 +339,30 @@ function obfuscatedJS(parser) {
 
 async function keywordJS(parser) {
     if (!parser) {
-        return "Blank";
+        return "Blanks";
     }
 
-    var list_malicious = ['eval', 'document.cookie', 'setcookie',
-                          'XMLHTTPRequest', 'child_process', 'window.location']
+    var list_malicious = ['alert', 'eval', 'document.cookie', 'setcookie', 'document.createEelement',
+                          'createXMLHTTPRequest', 'child_process', 'window.location', 'setTimeout', 'unescape',
+                          'escape', 'ActiveXObject', 'fromCharCode', 'replace', 'document.addEventListener',
+                          'attachEvent', 'createElement', 'getElementById', 'document.write', 'split',
+                          'onerror', 'setAttribute', 'console.log', 'charCodeAt', 'dateObject.toGMTString',
+                          'toString', 'GetCookie', 'element.appendChild', 'charAt', 'decode',
+                          'location.replace', 'getUserAgent', 'String.split', 'concat', 'exec']
     var search, ur_l, http_response;
+
     const scripts = parser.getElementsByTagName('script');
 
     for (var sscript of scripts) {
         var search_result;
+
         ur_l = sscript.getAttribute('src')
         if (ur_l != null) {
             protocol = new RegExp('http', "g");
             if (!ur_l.match(protocol)) {
                 ur_l = window.location.href + ur_l;
             }
+
             http_response = await DOM_parser(ur_l);
             if (http_response.string) {
                 for (i = 0; i < list_malicious.length; i++) {
@@ -293,53 +387,78 @@ async function keywordJS(parser) {
     return 'Tidak terdapat Keyword in Js';
 }
 
-function payloadHTML(string) {
-    if (!string) {
-        return "Blank atau Connection Time Out";
+function payloadHTML(string, url) {
+    if (string) {
+        for (i = 0; i < payload.length; i++) {
+            var ppayload = payload[i];
+            if (ppayload.includes("{id}")) {
+                str = ppayload.split("{id}");
+                ppayload = str[0];
+            }
+    
+            if (string.includes(ppayload)) {
+                return "Terdapat Payload in HTML";
+            }
+        }    
     }
-
-    for (i = 0; i < payload.length; i++) {
-        if (string.includes(payload[i])) {
-            console.log("Payload: " + payload[i]);
-            return "Terdapat Payload in HTML";
+    if (url) {
+        urlParam = decodeURIComponent(url.toLowerCase());
+        for (i = 0; i < payload.length; i++) {
+            if (payload[i].includes("{id}")) {
+                var str = payload[i].split("{id}");
+                if (urlParam.includes(str[0].toLowerCase())) {
+                    return "Terdapat Payload in HTML";
+                }
+            }
         }
     }
 
     return "Tidak terdapat Payload in HTML";
 }
 
-async function features(urlWindow) {
-    if (urlWindow.includes("?")) {
-        param = urlWindow.split("?");
-        urlParam = param[1];
+function getScript(string, parser) {
+    if (!string || !parser) {
+        return "Tidak ada javascript sus";
+    }
+    const scripts = parser.getElementsByTagName('script');
+
+    if (string.includes('script>') || scripts) {
+        js_script = "Terdapat javascript";
+    } else {
+        js_script = "Tidak ada javascript";
     }
 
-    const newUrl = new URL(urlWindow);
-    var dom = await htmlParser.DOM_parser(urlWindow);
-    var api_whois = await apiWHOIS.connectionToWHOIS(urlWindow);
-    var connectPage = await apiGoogleIndex.connectionGoogleIndex(url);
-    var connectDomain = await apiGoogleIndex.connectionGoogleIndex(newUrl.host);
-    var url_list = ngram.ngram(urlParam.toLowerCase());
+    return js_script;
+}
 
+(async () => {
+    var urlParam;
+    if (urlWindow.includes("?")) {
+        param = urlWindow.split("?");
+        urlParam = param[param.length - 1];
+    }
+    var domain = newUrl.host;
+    var cookie = getCookie(domain);
+    var dom = await DOM_parser(urlWindow);
+
+    // console.time('Waktu deteksi');
+    // console.time('Waktu fitur with');
     let length_URL = URLLength(urlWindow);
     let port_on_url = nonStandardPort();
     let special_character = specialCharacter(urlParam);
     let duplicated_character = duplicateCharacter(urlParam);
     let URL_of_SFH = ServerFormHandler(dom.dom);
-    let abnormal_URL = await AbnormalURL(api_whois);
+    let abnormal_URL = await AbnormalURL(urlWindow);
     let obfuscated_URL = obfuscatedURL(urlParam);
     let number_of_subdomain = numberOfThirdPartyDomain(urlParam);
     let request_cookie = requestForCookie(urlParam);
-    let google_index = await googleIndex(connectPage, connectDomain);
-    let html_tags = htmlTags(url_list);
-    let html_properties = htmlProperties(url_list);
-    let event_handler = eventHandler(url_list);
-    let dom_objects = domObjects(url_list);
-    let javascript_method = javascriptMethod(url_list);
-    let obfuscated_js = obfuscatedJS(dom.dom);
+    let google_index = await googleIndex(urlWindow);
+    let tags_code = tagsCode(urlParam);
     let keyword_in_js = await keywordJS(dom.dom);
-    let payload_html = payloadHTML(dom.string);
-    let get_script = getScript(dom.string);
+    let obfuscated_js = obfuscatedJS(dom.dom);
+    let payload_html = payloadHTML(dom.string, urlParam);
+    let get_script = getScript(dom.string, dom.dom);
+    // console.timeEnd('Waktu fitur with');
 
     var all_features = [];
     await all_features.push(
@@ -353,20 +472,88 @@ async function features(urlWindow) {
                             number_of_subdomain,
                             request_cookie,
                             google_index,
-                            html_tags,
-                            html_properties,
-                            event_handler,
-                            dom_objects,
-                            javascript_method,
-                            get_script,
-                            obfuscated_js,
+                            tags_code,
                             keyword_in_js,
+                            obfuscated_js,
                             payload_html,
                             );
 
     console.log(all_features);
-    
-    return all_features;
-};
+    console.log("with: " + get_script);
 
-module.exports = { features };
+    if (cookie != "") {
+        console.log("There is a cookie.");
+        console.log(cookie);
+        if (cookie == 'XSS'){
+            swal.fire ({
+                icon: 'warning',
+                title: 'This website has XSS attack!',
+                html: "<b>It can steal your data.</b> Want to visit this website?",
+                showCancelButton: true,
+                cancelButtonText: "Yes",
+                confirmButtonText: "No",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "javascript:history.back()";
+                }
+            });
+        }
+    } else {
+        var c45 = C45();
+        await fileSystem.readFile('Dataset_XSS_NonXSS.csv', 'utf-8', function(err, data) {
+            if (err) {
+                console.log(err);
+                return false;
+            }
+            CSVparser.parse(data, {
+                complete: function (result) {
+                    var headers = result.data[0];
+                    var features = headers.slice(1, -1);
+                    var target = headers[headers.length-1];
+    
+                    var trainingData = result.data.slice(1).map(function(d) {
+                        return d.slice(1);
+                    });
+    
+                    var featureTypes = trainingData[0].map(function(d) {
+                        return isNumeric(d) ? 'number' : 'category';
+                    });
+    
+                
+                    console.time('Waktu klasifikasi with');
+                    c45.train ({
+                        data: trainingData,
+                        target: target,
+                        features: features,
+                        featureTypes: featureTypes
+                    }, function(error, model) {
+                        if (error) {
+                            console.error(error);
+                        }
+                        // setCookie(domain, model.classify(all_features), 1);
+                        if (model.classify(all_features) == 'XSS') {
+                            swal.fire ({
+    
+                                icon: 'warning',
+                                title: 'This website has XSS attack!',
+                                html: "<b>It can steal your data.</b> Want to visit this website?",
+                                showCancelButton: true,
+                                cancelButtonText: "Yes",
+                                confirmButtonText: "No",
+                                reverseButtons: true
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = "javascript:history.back()";
+                                }
+                            });
+                        }
+                        console.log("Klasifikasi Model: " + model.classify(all_features));
+                    });
+                    // console.timeEnd('Waktu klasifikasi with');
+                    // console.timeEnd('Waktu deteksi');
+                }
+            });
+        });
+    }
+})();
