@@ -1,0 +1,25 @@
+### Install package.json
+```npm init -y```
+
+### Install package-lock.json
+```npm i lite-server```
+
+### Module to install:
+```
+npm i brfs
+npm i browserify
+npm i c4.5
+npm i papaparse
+npm i sweetalert2
+npm i scraperapi-sdk
+```
+
+### How to run:
+```browserify Features.js -o dist/features.js -t brfs```
+
+### Setting
+Pada manifest.json, ubah baris "js" menjadi
+```"js" : ["dist/features.js"]```
+
+Pada package.json, ubah baris "main" menjadi
+```"main": "Features.js"```

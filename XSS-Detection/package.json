@@ -1,21 +1,24 @@
 {
-  "name": "gollum15",
+  "name": "XSS-Detection",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "Features.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.21.1",
     "brfs": "^2.0.2",
+    "browserify": "^17.0.0",
     "browserify-fs": "^1.0.0",
-    "c5.0": "^0.0.3",
-    "file-saver": "^2.0.2",
-    "fs": "0.0.1-security",
-    "fs-extra": "^9.0.0",
+    "c4.5": "0.0.3",
+    "connection": "^1.4.0",
+    "lite-server": "^2.6.1",
     "papaparse": "^5.3.0",
-    "sweetalert2": "^9.17.2"
+    "scraperapi-sdk": "^1.0.6",
+    "sweetalert2": "^10.15.6"
   }
 }
