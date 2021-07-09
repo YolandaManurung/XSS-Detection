@@ -7,7 +7,7 @@ var scraperapiClient = require('scraperapi-sdk')('cfe85b2c97eb745f9b899e6147a4dd
 const { requestUrl, compareUrl } = require('./url-encoder'); // Encoding functions
 const { payload } = require('./payload');
 const { url } = require('inspector');
-const apiWHOIS = 'https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=at_GPYdwM0FKzQ3OC5Dx9dHljb1Fl1i2&outputFormat=JSON&domainName=';
+const apiWHOIS = 'https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=at_8RwCu0MvKlKFJeRkSmF4hNPCkuQoT&outputFormat=JSON&domainName=';
 
 const urlWindow = window.location.href;
 const newUrl = new URL(urlWindow);
@@ -501,7 +501,7 @@ function getScript(string, parser) {
         }
     } else {
         var c45 = C45();
-        await fileSystem.readFile('Dataset_XSS_NonXSS_With.csv', 'utf-8', function(err, data) {
+        await fileSystem.readFile('Dataset_XSS_NonXSS.csv', 'utf-8', function(err, data) {
             if (err) {
                 console.log(err);
                 return false;
